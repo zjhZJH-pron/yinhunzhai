@@ -55,6 +55,7 @@
 
 macOS 首次打开会被 Gatekeeper 拦（未做 Apple 付费公证），放行办法见包内 `README-macOS.txt`。
 Linux 免安装场景下 `chrome-sandbox` 无 setuid root，`start.sh` 已默认带 `--no-sandbox`。
+三个桌面包打包于 `src/core/store.js`（存盘落盘路径）之前；Electron 的 localStorage 实际可用，不影响游玩，但要与源码逐字节一致请用在线版或 `game.html`。
 
 安装包不提交进仓库：其中两个超过 GitHub 单文件 100 MiB 硬限，且会让仓库体积失控。
 
