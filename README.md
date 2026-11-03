@@ -32,6 +32,16 @@
 
 > 建议横屏。竖屏会显示转向提示。
 
+## 安卓 APK（真离线包）
+
+不想走浏览器、或要发给不碰 PWA 的人：Releases 里有 `YinHunZhai-mobile-v1.0.0.apk`（约 310 KB，Android 7.0+，目标 API 34）。
+
+- 游戏整体是 `assets/game/index.html` 这一个自包含文件，由全屏 WebView 加载，运行期零网络请求
+- **不申请 INTERNET 等任何权限**，装机时就能核实
+- 存档不写 localStorage —— WebView 在 `file://` 源下不保证它可写，两三小时的进度不能赌在这个上面。改由原生桥落到 SharedPreferences，见 `src/core/store.js` 与 `android/src/com/yinhunzhai/app/Store.java`
+- 退出要连按两次返回键，防误触丢进度
+- 用自生成的 RSA 密钥签名（非 Play 签名）。以后要原地升级就得留住 `android/keystore/`，丢了只能让老用户卸载重装
+
 ## 桌面安装包
 
 在 [Releases](../../releases) 页：
@@ -94,12 +104,14 @@ game.html
 ├─ manifest.webmanifest  PWA 清单
 ├─ sw.js                 Service Worker（离线缓存）
 ├─ build.js              打包器 src/ → game.html（仅用 Node 内置模块）
+├─ android/              安卓 APK 壳：全屏 WebView + 原生存档桥 + 免 Gradle 的手工构建脚本
 ├─ vendor/
 │  ├─ three.module.js    three r160 ES 模块版（开发用）
 │  └─ three.min.js       three r160 UMD 版（打包用）
 ├─ src/
 │  ├─ core/              引擎层
 │  │  ├─ platform.js     平台判定与画质档位
+│  │  ├─ store.js        存档读写：APK 内走原生存档桥，浏览器/Electron 仍用 localStorage
 │  │  ├─ touch.js        触控层：浮动摇杆 / 拖拽视角 / 点按交互
 │  │  ├─ util.js         数学 / 打字机 / 碰撞求解
 │  │  ├─ input.js        指针锁定 + 键鼠 + 模拟量摇杆通道
@@ -151,6 +163,14 @@ node build.js                 # → game.html（单文件，可双击）
 ```bash
 node desktop/pack-electron.js <electron-<平台>.zip> <out.zip> <appDir>
 ```
+
+打安卓包（不依赖 Gradle / Android Studio，只要一套便携 JDK + build-tools + platform）：
+
+```bash
+TC=/path/to/_toolchain bash android/build-apk.sh    # → dist/YinHunZhai-mobile-v1.0.0.apk
+```
+
+`build-apk.sh` 走 `javac → d8 → aapt2 compile/link → 塞 classes.dex → zipalign → apksigner`，自己把 `game.html` 拷成 APK 的 asset，并修正 aapt2 在 Windows 上写出的反斜杠条目名（`assets/game\index.html` 会被 Android 的 asset 树当成一整串文件名，页面 404、点开黑屏）——改名必须在 zipalign 与签名之前，否则签名作废。签名密钥放在 `android/keystore/`，不入库。
 
 `pack-electron.js` 对 mac/linux 采用**只追加**策略：原 zip 的字节与中央目录项原样保留，只在末尾追加 `resources/app/` 并重写中央目录。因为 darwin 包里有 14 个符号链接（`Electron Framework.framework/Versions/Current` 等）和 15 个执行位，linux 有 8 个执行位（含 `chrome-sandbox`）——在 Windows 上解压再压缩会丢掉这些元数据，得到的 `.app` 在 mac 上直接起不来。Windows 包没有这两类元数据，走正常的解压→改名→再压缩。
 

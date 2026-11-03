@@ -4,6 +4,7 @@ import {AudioEngine} from './core/audio.js';
 import {PostFX} from './core/postfx.js';
 import {profile,tier} from './core/platform.js';
 import {attachTouch} from './core/touch.js';
+import {getItem,setItem} from './core/store.js';
 import {Parts} from './world/parts.js';
 import {buildManor,ROOMS} from './world/manor.js';
 import {GameState,SAVE_KEY} from './game/state.js';
@@ -97,7 +98,7 @@ export class App{
     if(!this.running){this.running=true;this.loop();}
   }
   load(){
-    const raw=localStorage.getItem(SAVE_KEY);if(!raw)return false;
+    const raw=getItem(SAVE_KEY);if(!raw)return false;
     try{
       this.state=GameState.deserialize(raw);
       this.manor=buildManor(this);
@@ -119,8 +120,10 @@ export class App{
     if(!this.state)return;
     const p=this.player;
     this.state.checkpoint={pos:[p.pos.x,p.feet,p.pos.z],yaw:p.yaw,room:this.room().name};
-    try{localStorage.setItem(SAVE_KEY,this.state.serialize());this.hud.toast('已刻印 · 存档于本地','good');}
-    catch(e){this.hud.toast('存不下来：'+e.message,'bad');}
+    try{
+      const ok=setItem(SAVE_KEY,this.state.serialize());
+      this.hud.toast(ok?'已刻印 · 存档于本地':'存不下来：写入被拒绝',ok?'good':'bad');
+    }catch(e){this.hud.toast('存不下来：'+e.message,'bad');}
   }
   room(){
     const p=this.player.pos;
@@ -380,7 +383,7 @@ document.querySelectorAll('#diffPick .dbtn').forEach(b=>b.addEventListener('clic
   document.querySelectorAll('#diffPick .dbtn').forEach(x=>x.classList.remove('on'));
   b.classList.add('on');diff=b.dataset.diff;
 }));
-if(localStorage.getItem(SAVE_KEY))$('#btnContinue')?.classList.remove('hidden');
+if(getItem(SAVE_KEY))$('#btnContinue')?.classList.remove('hidden');
 
 async function enter(load){
   await Promise.race([app.audio.init().catch(()=>{}),new Promise(r=>setTimeout(r,1500))]);

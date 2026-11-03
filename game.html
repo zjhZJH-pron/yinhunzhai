@@ -709,6 +709,28 @@ function profile(){
   __x.profile = profile;
 };
 
+__def['src/core/store.js'] = function (__req, __x) {
+/* 存档读写的一层薄壳。
+   APK 里页面走 file://，WebView 在该源下不保证 localStorage 可写，
+   原生壳注入的 AndroidStore 桥会落到 SharedPreferences；浏览器与
+   Electron 没有这个桥，继续用 localStorage。 */
+const B = typeof window !== 'undefined' ? window.AndroidStore : null;
+
+function getItem(k){
+  if(B) return B.get(k);
+  try { return localStorage.getItem(k); } catch(e) { return null; }
+}
+
+function setItem(k,v){
+  if(B) return B.put(k,v);
+  try { localStorage.setItem(k,v); return true; } catch(e) { return false; }
+}
+
+
+  __x.getItem = getItem;
+  __x.setItem = setItem;
+};
+
 __def['src/core/util.js'] = function (__req, __x) {
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 const lerp=(a,b,t)=>a+(b-a)*t;
@@ -6099,6 +6121,7 @@ const { AudioEngine } = __req('src/core/audio.js');
 const { PostFX } = __req('src/core/postfx.js');
 const { profile, tier } = __req('src/core/platform.js');
 const { attachTouch } = __req('src/core/touch.js');
+const { getItem, setItem } = __req('src/core/store.js');
 const { Parts } = __req('src/world/parts.js');
 const { buildManor, ROOMS } = __req('src/world/manor.js');
 const { GameState, SAVE_KEY } = __req('src/game/state.js');
@@ -6192,7 +6215,7 @@ class App{
     if(!this.running){this.running=true;this.loop();}
   }
   load(){
-    const raw=localStorage.getItem(SAVE_KEY);if(!raw)return false;
+    const raw=getItem(SAVE_KEY);if(!raw)return false;
     try{
       this.state=GameState.deserialize(raw);
       this.manor=buildManor(this);
@@ -6214,8 +6237,10 @@ class App{
     if(!this.state)return;
     const p=this.player;
     this.state.checkpoint={pos:[p.pos.x,p.feet,p.pos.z],yaw:p.yaw,room:this.room().name};
-    try{localStorage.setItem(SAVE_KEY,this.state.serialize());this.hud.toast('已刻印 · 存档于本地','good');}
-    catch(e){this.hud.toast('存不下来：'+e.message,'bad');}
+    try{
+      const ok=setItem(SAVE_KEY,this.state.serialize());
+      this.hud.toast(ok?'已刻印 · 存档于本地':'存不下来：写入被拒绝',ok?'good':'bad');
+    }catch(e){this.hud.toast('存不下来：'+e.message,'bad');}
   }
   room(){
     const p=this.player.pos;
@@ -6475,7 +6500,7 @@ document.querySelectorAll('#diffPick .dbtn').forEach(b=>b.addEventListener('clic
   document.querySelectorAll('#diffPick .dbtn').forEach(x=>x.classList.remove('on'));
   b.classList.add('on');diff=b.dataset.diff;
 }));
-if(localStorage.getItem(SAVE_KEY))$('#btnContinue')?.classList.remove('hidden');
+if(getItem(SAVE_KEY))$('#btnContinue')?.classList.remove('hidden');
 
 async function enter(load){
   await Promise.race([app.audio.init().catch(()=>{}),new Promise(r=>setTimeout(r,1500))]);

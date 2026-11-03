@@ -1,0 +1,4 @@
+# 构建产物与签名密钥，都不该进版本库
+/build/
+/assets/game/index.html
+/keystore/

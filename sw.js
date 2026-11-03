@@ -3,7 +3,7 @@
  * 策略：stale-while-revalidate —— 先用缓存秒开，同时后台拉新版，下次进入即更新。
  * 改代码后务必递增 VERSION，否则老缓存会赖着不走。
  */
-const VERSION='yinhunzhai-v1.0.0';
+const VERSION='yinhunzhai-v1.0.1';
 const SHELL=[
   './','./index.html','./styles.css','./game.html','./manifest.webmanifest',
   './vendor/three.module.js',

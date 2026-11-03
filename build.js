@@ -25,6 +25,7 @@ const arg = (name, dflt) => {
 /* 依赖顺序：被依赖者在前。新增模块时按此插入。 */
 const ORDER = [
   'src/core/platform.js',      // 无依赖，且 textures 要问它要画质档位
+  'src/core/store.js',         // 只依赖 window，main.js 用它读写存档
   'src/core/util.js',
   'src/world/textures.js',
   'src/world/parts.js',
