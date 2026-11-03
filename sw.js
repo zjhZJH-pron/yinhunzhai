@@ -9,6 +9,7 @@ const SHELL=[
   './vendor/three.module.js',
   './src/main.js','./src/core/util.js','./src/core/input.js','./src/core/audio.js',
   './src/core/postfx.js','./src/core/platform.js','./src/core/touch.js',
+  './src/core/store.js',
   './src/world/textures.js','./src/world/parts.js','./src/world/manor.js',
   './src/game/state.js','./src/game/interact.js','./src/game/story.js','./src/game/npc.js',
   './src/ui/hud.js','./src/ui/panels.js',
