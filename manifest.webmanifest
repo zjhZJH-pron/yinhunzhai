@@ -1,0 +1,17 @@
+{
+  "name": "引魂宅 · 红妆劫",
+  "short_name": "引魂宅",
+  "description": "中式恐怖 3D 第一人称密室逃脱。冥婚、五行方色、昭穆、九宫算。全资产程序化生成。",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#0a0807",
+  "theme_color": "#0a0807",
+  "categories": ["games"],
+  "lang": "zh-CN",
+  "icons": [
+    { "src": "./desktop/icon.png", "sizes": "256x256", "type": "image/png", "purpose": "any" },
+    { "src": "./desktop/icon.png", "sizes": "256x256", "type": "image/png", "purpose": "maskable" }
+  ]
+}

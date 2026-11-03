@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0a0807">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="引魂宅">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./desktop/icon.png">
+<link rel="apple-touch-icon" href="./desktop/icon.png">
+<title>引魂宅 · 红妆劫 — 中式恐怖 3D 密室逃脱</title>
+<link rel="stylesheet" href="styles.css">
+<script type="importmap">
+{ "imports": { "three": "./vendor/three.module.js" } }
+</script>
+</head>
+<body>
+
+<canvas id="scene"></canvas>
+<div id="grain" aria-hidden="true"></div>
+<div id="bloodVig" aria-hidden="true"></div>
+
+<!-- ============ 竖屏提示 ============ -->
+<div id="rotateHint">此宅为横屏而造<br>请把手机转过来<div class="rh-phone">▯</div></div>
+
+<!-- ============ HUD ============ -->
+<div id="hud" class="hidden">  <div id="crosshair"></div>
+  <div id="prompt"><span id="promptKey">E</span><span id="promptText"></span></div>
+
+  <div id="soulLamp">
+    <div class="lamp-label">魂灯</div>
+    <div class="lamp-bar"><i id="lampFill"></i></div>
+    <div class="lamp-num" id="lampNum">0</div>
+  </div>
+
+  <div id="breathWrap" class="hidden">
+    <div class="breath-label">屏息</div>
+    <div class="breath-bar"><i id="breathFill"></i></div>
+  </div>
+
+  <div id="objective">
+    <div class="obj-title" id="objTitle">第一章</div>
+    <div class="obj-text" id="objText"></div>
+  </div>
+
+  <div id="invBar"></div>
+  <div id="toastStack"></div>
+  <div id="whisper"></div>
+
+  <div id="hintChip" class="hidden">按 <b>H</b> 燃香平心 · <b>J</b> 翻簿 · <b>TAB</b> 囊中物</div>
+</div>
+
+<!-- ============ 对话 ============ -->
+<div id="dialog" class="hidden">
+  <div class="dlg-portrait" id="dlgPortrait"><span id="dlgPortraitGlyph">嬿</span></div>
+  <div class="dlg-body">
+    <div class="dlg-name" id="dlgName"></div>
+    <div class="dlg-text" id="dlgText"></div>
+    <div class="dlg-choices" id="dlgChoices"></div>
+  </div>
+</div>
+
+<!-- ============ 谜题面板容器 ============ -->
+<div id="panelRoot" class="hidden"><div id="panelInner"></div></div>
+
+<!-- ============ 日志/簿 ============ -->
+<div id="journal" class="hidden">
+  <div class="jr-head">
+    <h2>引魂簿</h2>
+    <button id="jrClose">合上 [J]</button>
+  </div>
+  <div class="jr-cols">
+    <div><h3>所求</h3><ul id="jrGoals"></ul></div>
+    <div><h3>所见所闻</h3><ul id="jrNotes"></ul></div>
+    <div><h3>囊中物</h3><ul id="jrItems"></ul></div>
+  </div>
+</div>
+
+<!-- ============ 标题 ============ -->
+<div id="title">
+  <div class="t-fog"></div>
+  <div class="t-lantern l1"></div>
+  <div class="t-lantern l2"></div>
+  <div class="t-frame">
+    <div class="t-seal">壹</div>
+    <h1 class="t-main">引魂宅</h1>
+    <div class="t-sub">红 妆 劫</div>
+    <p class="t-blurb">
+      民国十七年秋，你在槐宅门外醒来。<br>
+      宅中今夜要办一桩冥婚，聘的是一位<b>从未谋面的活人</b>——你。<br>
+      十道机关，六礼已成其五。天一亮，盖头就要落到你头上。
+    </p>
+    <div class="t-diff" id="diffPick">
+      <button class="dbtn" data-diff="normal"><b>夜探</b><i>可循迹而行</i></button>
+      <button class="dbtn on" data-diff="hard"><b>凶宅</b><i>阴气侵蚀 · 无指引</i></button>
+      <button class="dbtn" data-diff="nightmare"><b>夺舍</b><i>她一直在看着你</i></button>
+    </div>
+    <div class="t-acts">
+      <button id="btnStart" class="tbtn main">推 门 而 入</button>
+      <button id="btnContinue" class="tbtn ghost hidden">续 前 缘</button>
+    </div>
+    <div class="t-notice">
+      本作含惊吓、幽闭与民俗恐怖元素，请酌情游玩。<br>
+      建议戴耳机、关灯。所有女性角色均为成年人设，魅惑止于氛围与暗示，不含露骨内容。<br>
+      <span class="kbd">WASD</span> 行走 · <span class="kbd">Shift</span> 疾走 · <span class="kbd">Ctrl</span> 屏息 · <span class="kbd">E</span> 交互 · <span class="kbd">Tab</span> 囊中物 · <span class="kbd">J</span> 簿 · <span class="kbd">Esc</span> 释义
+    </div>
+  </div>
+</div>
+
+<!-- ============ 幕间 ============ -->
+<div id="curtain" class="hidden">
+  <div class="cu-text" id="curtainText"></div>
+</div>
+
+<!-- ============ 死亡/结局 ============ -->
+<div id="endscreen" class="hidden">
+  <div class="en-kicker" id="enKicker"></div>
+  <h2 class="en-title" id="enTitle"></h2>
+  <p class="en-body" id="enBody"></p>
+  <div class="en-acts">
+    <button id="btnResume" class="tbtn main">自 香炉前 醒来</button>
+    <button id="btnQuit" class="tbtn ghost">回到门外</button>
+  </div>
+</div>
+
+<!-- ============ 暂停释义 ============ -->
+<div id="pause" class="hidden">
+  <div class="pa-box">
+    <h3>引魂宅 · 释义</h3>
+    <ul class="pa-list">
+      <li><b>WASD</b> 行走 · <b>Shift</b> 疾走（脚步响亮，她会听见）</li>
+      <li><b>E</b> 查看 / 拾取 / 使用 · 手持物时对目标使用</li>
+      <li><b>Ctrl</b> 屏息 —— 藏身时她走近，屏息可躲过</li>
+      <li><b>H</b> 于香炉前燃香，平定阴气，方圆之内她不敢入</li>
+      <li><b>Tab</b> 囊中物 · <b>J</b> 引魂簿（线索与所求）</li>
+      <li><b>魂灯</b> 即你的心智。灯灭，你便不再是自己</li>
+    </ul>
+    <div class="pa-acts">
+      <button id="btnResumePlay" class="tbtn main">继 续</button>
+      <button id="btnSave" class="tbtn ghost">刻 印（存档）</button>
+      <button id="btnTitleBack" class="tbtn ghost">回 门 外</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="./src/main.js"></script>
+<noscript>本作需要 JavaScript 与 WebGL。</noscript>
+</body>
+</html>

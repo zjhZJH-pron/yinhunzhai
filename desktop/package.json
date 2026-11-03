@@ -1,0 +1,10 @@
+{
+  "name": "yinhunzhai",
+  "productName": "引魂宅 · 红妆劫",
+  "version": "1.0.0",
+  "description": "中式恐怖 3D 密室逃脱 — 引魂宅·红妆劫",
+  "main": "main.js",
+  "author": "yinhunzhai",
+  "license": "MIT",
+  "private": true
+}

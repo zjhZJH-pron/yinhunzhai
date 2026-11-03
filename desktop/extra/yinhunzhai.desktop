@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=引魂宅 · 红妆劫
+Name[zh_CN]=引魂宅 · 红妆劫
+GenericName=中式恐怖 3D 密室逃脱
+Comment=中式恐怖 3D 密室逃脱 — 冥婚·五行·昭穆·九宫
+Exec=/opt/yinhunzhai/start.sh
+Icon=/opt/yinhunzhai/resources/app/icon.png
+Terminal=false
+Categories=Game;AdventureGame;
+Keywords=恐怖;密室;解谜;中式恐怖;
+StartupWMClass=yinhunzhai
